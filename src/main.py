@@ -5,6 +5,12 @@ WIDTH, HEIGHT = BG_IMAGE.get_width(), BG_IMAGE.get_height()
 
 BIRD_IMAGE = pygame.image.load("assets/images/bird.png")
 
+BASE_IMAGE = pygame.image.load("assets/images/base.png")
+BASE_HEIGHT = HEIGHT-BASE_IMAGE.get_height()
+
+GAMEOVER_IMAGE = pygame.image.load("assets/images/gameover.png")
+PIPE_IMAGE = pygame.image.load("assets/images/pipe.png")
+
 class Bird:
     def __init__(self, x, y):
         self.x = x
@@ -29,17 +35,18 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Flappy Bird de chez Wish")
-        self.bird = Bird(50, HEIGHT//2)
+        self.bird = Bird(50, BASE_HEIGHT//2)
 
     def draw_screen(self):
         self.screen.blit(BG_IMAGE, (0, 0))
+        self.screen.blit(BASE_IMAGE, (0, BASE_HEIGHT))
         self.bird.draw(self.screen)
     
     def run(self):
         clock = pygame.time.Clock()
         running = True
         while running:
-            clock.tick(60) # Limiter les FPS à 60 par secondes 
+            clock.tick(60) # Limiter les FPS à 60 par seconde
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -50,7 +57,7 @@ class Game:
             self.bird.update()
             self.draw_screen()
             pygame.display.update()
-        
+
         pygame.quit()
 
 def main():
