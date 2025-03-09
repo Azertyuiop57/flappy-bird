@@ -20,6 +20,10 @@ PIPE_IMAGE = pygame.image.load("assets/images/pipe.png")
 P_WIDTH, P_HEIGHT = PIPE_IMAGE.get_width(), PIPE_IMAGE.get_height()
 STARTING_MESSAGE = pygame.image.load("assets/images/message.png")
 
+DIGITS_IMAGES = [
+    pygame.image.load(f"assets/images/{i}.png") for i in range(10)
+]
+
 pygame.font.init()
 FONT = pygame.font.SysFont("Courier Bold", 50)
 
@@ -97,17 +101,22 @@ class Pipe:
 class SText:
     def __init__(self, x, y):
         self.text = "0"
-        self.SCORE_TEXT = FONT.render(self.text, True, (255, 255, 255))
-        self.width, self.height = self.SCORE_TEXT.get_width(), self.SCORE_TEXT.get_height()
-        self.x = x - self.width // 2
-        self.y = y - self.height // 2
+        self.width, self.height = DIGITS_IMAGES[0].get_width(), DIGITS_IMAGES[0].get_height()
+        self.x = x
+        self.y = y
     
     def update(self, text):
-        self.SCORE_TEXT = FONT.render(text, True, (255, 255, 255))
+        self.text = str(text)
 
     def draw(self, screen):
-        screen.blit(self.SCORE_TEXT, (self.x, self.y))
+        print(screen.get_width())
+        starting_x = self.get_starting_x_coord(self.width, len(self.text), self.x)
+        for i in range(len(self.text)):
+            screen.blit(DIGITS_IMAGES[int(self.text[i])], (starting_x+i*self.width, self.y))
 
+    def get_starting_x_coord(self, width, length, x):
+        return x - length*width//2
+    
 class Game:
     def __init__(self):
         pygame.init()
@@ -166,7 +175,7 @@ class Game:
                 self.pipe1.update()
                 self.pipe2.update()
                 if self.bird.is_scoring(self.pipe1) or self.bird.is_scoring(self.pipe2):
-                    self.score += 1
+                    self.score += 11
                     self.score_text.update(str(self.score))
             self.draw_screen()
             pygame.display.update()
