@@ -1,4 +1,5 @@
 import pygame
+import math
 
 BG_IMAGE = pygame.image.load("assets/images/background-day.png")
 WIDTH, HEIGHT = BG_IMAGE.get_width(), BG_IMAGE.get_height()
@@ -10,6 +11,7 @@ BASE_HEIGHT = HEIGHT-BASE_IMAGE.get_height()
 
 GAMEOVER_IMAGE = pygame.image.load("assets/images/gameover.png")
 PIPE_IMAGE = pygame.image.load("assets/images/pipe.png")
+STARTING_MESSAGE = pygame.image.load("assets/images/message.png")
 
 class Bird:
     def __init__(self, x, y, bird_image, base_height):
@@ -52,29 +54,41 @@ class Game:
         pygame.display.set_caption("Flappy Bird de chez Wish")
         self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGE, BASE_HEIGHT)
         self.is_game_over = False
+        self.game_started = False
+        self.counter = 0
 
     def draw_screen(self):
         self.screen.blit(BG_IMAGE, (0, 0))
         self.screen.blit(BASE_IMAGE, (0, BASE_HEIGHT))
-        self.bird.draw(self.screen)
+        if not self.game_started:
+            self.screen.blit(STARTING_MESSAGE, (WIDTH//2-STARTING_MESSAGE.get_width()//2, math.cos(self.counter / 20) * 5 + BASE_HEIGHT//2-STARTING_MESSAGE.get_height()//2))
+        else:
+            self.bird.draw(self.screen)
+            
         if self.is_game_over:
-            self.screen.blit(GAMEOVER_IMAGE, (WIDTH//2-GAMEOVER_IMAGE.get_width()//2, BASE_HEIGHT//2-GAMEOVER_IMAGE.get_height()//2))
+            self.screen.blit(GAMEOVER_IMAGE, (WIDTH//2-GAMEOVER_IMAGE.get_width()//2, math.cos(self.counter / 40) * 5 + BASE_HEIGHT//2-GAMEOVER_IMAGE.get_height()//2))
     
     def run(self):
         clock = pygame.time.Clock()
         running = True
         while running:
+            self.counter += 1
             clock.tick(60) # Limiter les FPS à 60 par seconde
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
+                        self.game_started = True if not self.game_started else self.game_started # Commence le jeu s'il n'est pas commencé, sinon rien ne se passe.
+
+                        if self.is_game_over:
+                            self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGE, BASE_HEIGHT) # Créer un nouvel oiseau si le dernier est mort
+                            self.is_game_over = False
+
                         self.bird.jump()
-
-            if not self.is_game_over:
+            
+            if not self.is_game_over and self.game_started:
                 self.is_game_over = self.bird.update()
-
             self.draw_screen()
             pygame.display.update()
 
