@@ -10,7 +10,7 @@ BIRD_IMAGES = [
     pygame.image.load("assets/images/bird2.png"),
     pygame.image.load("assets/images/bird3.png")
 ]
-B_WIDTH, B_HEIGHT = BIRD_IMAGES.get_width(), BIRD_IMAGES.get_height()
+B_WIDTH, B_HEIGHT = 34, 24
 
 BASE_IMAGE = pygame.image.load("assets/images/base.png")
 BASE_HEIGHT = HEIGHT-BASE_IMAGE.get_height()
@@ -19,6 +19,9 @@ GAMEOVER_IMAGE = pygame.image.load("assets/images/gameover.png")
 PIPE_IMAGE = pygame.image.load("assets/images/pipe.png")
 P_WIDTH, P_HEIGHT = PIPE_IMAGE.get_width(), PIPE_IMAGE.get_height()
 STARTING_MESSAGE = pygame.image.load("assets/images/message.png")
+
+pygame.font.init()
+FONT = pygame.font.SysFont("Courier Bold", 50)
 
 class Bird:
     def __init__(self, x, y, bird_images, base_height):
@@ -69,6 +72,11 @@ class Bird:
             if y_center > pipe.y + 75 or y_center < pipe.y - 75:
                 return True
         return False
+    
+    def is_scoring(self, pipe):
+        if self.x == pipe.x:
+            return True
+        return False
 
 class Pipe:
     def __init__(self, x, y):
@@ -85,6 +93,20 @@ class Pipe:
     
     def draw(self, screen):
         screen.blit(PIPE_IMAGE, (self.x-P_WIDTH//2, self.y-P_HEIGHT//2))
+    
+class SText:
+    def __init__(self, x, y):
+        self.text = "0"
+        self.SCORE_TEXT = FONT.render(self.text, True, (255, 255, 255))
+        self.width, self.height = self.SCORE_TEXT.get_width(), self.SCORE_TEXT.get_height()
+        self.x = x - self.width // 2
+        self.y = y - self.height // 2
+    
+    def update(self, text):
+        self.SCORE_TEXT = FONT.render(text, True, (255, 255, 255))
+
+    def draw(self, screen):
+        screen.blit(self.SCORE_TEXT, (self.x, self.y))
 
 class Game:
     def __init__(self):
@@ -94,9 +116,11 @@ class Game:
         self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGES, BASE_HEIGHT)
         self.pipe1 = Pipe(WIDTH, random.randint(50, BASE_HEIGHT-100))
         self.pipe2 = Pipe(WIDTH//2, random.randint(50, BASE_HEIGHT-100))
+        self.score_text = SText(WIDTH//2, 30)
         self.is_game_over = False
         self.game_started = False
         self.counter = 0
+        self.score = 0
 
     def draw_screen(self):
         self.screen.blit(BG_IMAGE, (0, 0))
@@ -106,6 +130,7 @@ class Game:
             self.bird.draw(self.screen)
             self.pipe1.draw(self.screen)
             self.pipe2.draw(self.screen)
+            self.score_text.draw(self.screen)
 
         self.screen.blit(BASE_IMAGE, (0, BASE_HEIGHT))
             
@@ -129,6 +154,8 @@ class Game:
                             self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGES, BASE_HEIGHT) # Créer un nouvel oiseau si le dernier est mort
                             self.pipe1 = Pipe(WIDTH, random.randint(50, BASE_HEIGHT-100))
                             self.pipe2 = Pipe(WIDTH//2, random.randint(50, BASE_HEIGHT-100))
+                            self.score_text = SText(WIDTH//2, 30)
+                            self.score = 0
                             self.is_game_over = False
 
                         self.bird.jump()
@@ -138,6 +165,9 @@ class Game:
                     self.is_game_over = True
                 self.pipe1.update()
                 self.pipe2.update()
+                if self.bird.is_scoring(self.pipe1) or self.bird.is_scoring(self.pipe2):
+                    self.score += 1
+                    self.score_text.update(str(self.score))
             self.draw_screen()
             pygame.display.update()
 
