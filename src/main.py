@@ -1,5 +1,6 @@
 import pygame
 import math
+import random
 
 BG_IMAGE = pygame.image.load("assets/images/background-day.png")
 WIDTH, HEIGHT = BG_IMAGE.get_width(), BG_IMAGE.get_height()
@@ -9,12 +10,14 @@ BIRD_IMAGES = [
     pygame.image.load("assets/images/bird2.png"),
     pygame.image.load("assets/images/bird3.png")
 ]
+B_WIDTH, B_HEIGHT = BIRD_IMAGES.get_width(), BIRD_IMAGES.get_height()
 
 BASE_IMAGE = pygame.image.load("assets/images/base.png")
 BASE_HEIGHT = HEIGHT-BASE_IMAGE.get_height()
 
 GAMEOVER_IMAGE = pygame.image.load("assets/images/gameover.png")
 PIPE_IMAGE = pygame.image.load("assets/images/pipe.png")
+P_WIDTH, P_HEIGHT = PIPE_IMAGE.get_width(), PIPE_IMAGE.get_height()
 STARTING_MESSAGE = pygame.image.load("assets/images/message.png")
 
 class Bird:
@@ -58,6 +61,30 @@ class Bird:
 
     def is_touching_ceiling(self):
         return self.y < 0 
+    
+    def is_touching_pipe(self, pipe):
+        x_center = self.x + B_WIDTH // 2
+        y_center = self.y + B_HEIGHT // 2
+        if x_center > pipe.x - 26 and x_center < pipe.x + 26:
+            if y_center > pipe.y + 75 or y_center < pipe.y - 75:
+                return True
+        return False
+
+class Pipe:
+    def __init__(self, x, y):
+        self.x = x
+        self.init_x = WIDTH
+        self.y = y
+        self.speed = 1
+
+    def update(self):
+        self.x -= self.speed
+        if self.x < 0:
+            self.x = self.init_x
+            self.y = random.randint(100, BASE_HEIGHT-100)
+    
+    def draw(self, screen):
+        screen.blit(PIPE_IMAGE, (self.x-P_WIDTH//2, self.y-P_HEIGHT//2))
 
 class Game:
     def __init__(self):
@@ -65,17 +92,22 @@ class Game:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Flappy Bird de chez Wish")
         self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGES, BASE_HEIGHT)
+        self.pipe1 = Pipe(WIDTH, random.randint(50, BASE_HEIGHT-100))
+        self.pipe2 = Pipe(WIDTH//2, random.randint(50, BASE_HEIGHT-100))
         self.is_game_over = False
         self.game_started = False
         self.counter = 0
 
     def draw_screen(self):
         self.screen.blit(BG_IMAGE, (0, 0))
-        self.screen.blit(BASE_IMAGE, (0, BASE_HEIGHT))
         if not self.game_started:
             self.screen.blit(STARTING_MESSAGE, (WIDTH//2-STARTING_MESSAGE.get_width()//2, math.cos(self.counter / 20) * 5 + BASE_HEIGHT//2-STARTING_MESSAGE.get_height()//2))
         else:
             self.bird.draw(self.screen)
+            self.pipe1.draw(self.screen)
+            self.pipe2.draw(self.screen)
+
+        self.screen.blit(BASE_IMAGE, (0, BASE_HEIGHT))
             
         if self.is_game_over:
             self.screen.blit(GAMEOVER_IMAGE, (WIDTH//2-GAMEOVER_IMAGE.get_width()//2, math.cos(self.counter / 40) * 5 + BASE_HEIGHT//2-GAMEOVER_IMAGE.get_height()//2))
@@ -95,12 +127,17 @@ class Game:
 
                         if self.is_game_over:
                             self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGES, BASE_HEIGHT) # Créer un nouvel oiseau si le dernier est mort
+                            self.pipe1 = Pipe(WIDTH, random.randint(50, BASE_HEIGHT-100))
+                            self.pipe2 = Pipe(WIDTH//2, random.randint(50, BASE_HEIGHT-100))
                             self.is_game_over = False
 
                         self.bird.jump()
             
             if not self.is_game_over and self.game_started:
-                self.is_game_over = self.bird.update()
+                if self.bird.update() or self.bird.is_touching_pipe(self.pipe1) or self.bird.is_touching_pipe(self.pipe2):
+                    self.is_game_over = True
+                self.pipe1.update()
+                self.pipe2.update()
             self.draw_screen()
             pygame.display.update()
 
