@@ -93,23 +93,22 @@ class Pipe:
         self.x -= self.speed
         if self.x < 0 - P_WIDTH:
             self.x = self.init_x
-            self.y = random.randint(95, BASE_HEIGHT-95)
+            self.y = random.randint(100, BASE_HEIGHT-100)
     
     def draw(self, screen):
         screen.blit(PIPE_IMAGE, (self.x-P_WIDTH//2, self.y-P_HEIGHT//2))
     
 class SText:
     def __init__(self, x, y):
-        self.text = "0"
-        self.width, self.height = DIGITS_IMAGES[0].get_width(), DIGITS_IMAGES[0].get_height()
         self.x = x
         self.y = y
+        self.width, self.height = DIGITS_IMAGES[0].get_width(), DIGITS_IMAGES[0].get_height()
+        self.text = "0"
     
     def update(self, text):
         self.text = str(text)
 
     def draw(self, screen):
-        print(screen.get_width())
         starting_x = self.get_starting_x_coord(self.width, len(self.text), self.x)
         for i in range(len(self.text)):
             screen.blit(DIGITS_IMAGES[int(self.text[i])], (starting_x+i*self.width, self.y))
@@ -123,9 +122,9 @@ class Game:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Flappy Bird de chez Wish")
         self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGES, BASE_HEIGHT)
-        self.pipe1 = Pipe(2*WIDTH+P_WIDTH, random.randint(50, BASE_HEIGHT-95))
-        self.pipe2 = Pipe(WIDTH+WIDTH//2, random.randint(50, BASE_HEIGHT-95))
-        self.score_text = SText(WIDTH//2, 30)
+        self.pipe1 = Pipe(2*WIDTH+P_WIDTH, random.randint(100, BASE_HEIGHT-100))
+        self.pipe2 = Pipe(WIDTH+WIDTH//2, random.randint(100, BASE_HEIGHT-100))
+        self.score_text = SText(WIDTH//2, 20)
         self.is_game_over = False
         self.game_started = False
         self.counter = 0
@@ -161,8 +160,8 @@ class Game:
 
                         if self.is_game_over:
                             self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGES, BASE_HEIGHT) # Créer un nouvel oiseau si le dernier est mort
-                            self.pipe1 = Pipe(2*WIDTH+P_WIDTH, random.randint(50, BASE_HEIGHT-95))
-                            self.pipe2 = Pipe(WIDTH+WIDTH//2, random.randint(50, BASE_HEIGHT-95))
+                            self.pipe1 = Pipe(2*WIDTH+P_WIDTH, random.randint(100, BASE_HEIGHT-100))
+                            self.pipe2 = Pipe(WIDTH+WIDTH//2, random.randint(100, BASE_HEIGHT-100))
                             self.score_text = SText(WIDTH//2, 30)
                             self.score = 0
                             self.is_game_over = False
@@ -175,7 +174,7 @@ class Game:
                 self.pipe1.update()
                 self.pipe2.update()
                 if self.bird.is_scoring(self.pipe1) or self.bird.is_scoring(self.pipe2):
-                    self.score += 11
+                    self.score += 1 
                     self.score_text.update(str(self.score))
             self.draw_screen()
             pygame.display.update()
