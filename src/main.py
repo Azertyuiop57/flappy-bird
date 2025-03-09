@@ -24,11 +24,23 @@ class Bird:
             self.y_velocity -= self.gravity
         self.y -= self.y_velocity
 
+        if self.is_touching_ceiling() or self.is_colliding_with_base():
+            running = False
+        else: 
+            running = True
+        return running
+
     def draw(self, screen):
         screen.blit(BIRD_IMAGE, (self.x, self.y))
         
     def jump(self):
         self.y_velocity = self.jump_force
+
+    def is_colliding_with_base(self):
+        return self.y + BIRD_IMAGE.get_height() > BASE_HEIGHT
+
+    def is_touching_ceiling(self):
+        return self.y < 0 
 
 class Game:
     def __init__(self):
@@ -54,7 +66,7 @@ class Game:
                     if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
                         self.bird.jump()
                         
-            self.bird.update()
+            running = self.bird.update()
             self.draw_screen()
             pygame.display.update()
 
