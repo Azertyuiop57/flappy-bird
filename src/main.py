@@ -10,7 +10,7 @@ BIRD_IMAGES = [
     pygame.image.load("assets/images/bird2.png"),
     pygame.image.load("assets/images/bird3.png")
 ]
-B_WIDTH, B_HEIGHT = 34, 24
+B_WIDTH, B_HEIGHT = BIRD_IMAGES[0].get_width(), BIRD_IMAGES[0].get_height()
 
 BASE_IMAGE = pygame.image.load("assets/images/base.png")
 BASE_HEIGHT = HEIGHT-BASE_IMAGE.get_height()
@@ -81,15 +81,15 @@ class Bird:
 class Pipe:
     def __init__(self, x, y):
         self.x = x
-        self.init_x = WIDTH
+        self.init_x = WIDTH+P_WIDTH
         self.y = y
-        self.speed = 1
+        self.speed = 2
 
     def update(self):
         self.x -= self.speed
-        if self.x < 0:
+        if self.x < 0 - P_WIDTH:
             self.x = self.init_x
-            self.y = random.randint(100, BASE_HEIGHT-100)
+            self.y = random.randint(95, BASE_HEIGHT-95)
     
     def draw(self, screen):
         screen.blit(PIPE_IMAGE, (self.x-P_WIDTH//2, self.y-P_HEIGHT//2))
@@ -114,8 +114,8 @@ class Game:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Flappy Bird de chez Wish")
         self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGES, BASE_HEIGHT)
-        self.pipe1 = Pipe(WIDTH, random.randint(50, BASE_HEIGHT-100))
-        self.pipe2 = Pipe(WIDTH//2, random.randint(50, BASE_HEIGHT-100))
+        self.pipe1 = Pipe(2*WIDTH+P_WIDTH, random.randint(50, BASE_HEIGHT-95))
+        self.pipe2 = Pipe(WIDTH+WIDTH//2, random.randint(50, BASE_HEIGHT-95))
         self.score_text = SText(WIDTH//2, 30)
         self.is_game_over = False
         self.game_started = False
@@ -152,8 +152,8 @@ class Game:
 
                         if self.is_game_over:
                             self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGES, BASE_HEIGHT) # Créer un nouvel oiseau si le dernier est mort
-                            self.pipe1 = Pipe(WIDTH, random.randint(50, BASE_HEIGHT-100))
-                            self.pipe2 = Pipe(WIDTH//2, random.randint(50, BASE_HEIGHT-100))
+                            self.pipe1 = Pipe(2*WIDTH+P_WIDTH, random.randint(50, BASE_HEIGHT-95))
+                            self.pipe2 = Pipe(WIDTH+WIDTH//2, random.randint(50, BASE_HEIGHT-95))
                             self.score_text = SText(WIDTH//2, 30)
                             self.score = 0
                             self.is_game_over = False
