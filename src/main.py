@@ -4,7 +4,11 @@ import math
 BG_IMAGE = pygame.image.load("assets/images/background-day.png")
 WIDTH, HEIGHT = BG_IMAGE.get_width(), BG_IMAGE.get_height()
 
-BIRD_IMAGE = pygame.image.load("assets/images/bird.png")
+BIRD_IMAGES = [
+    pygame.image.load("assets/images/bird1.png"),
+    pygame.image.load("assets/images/bird2.png"),
+    pygame.image.load("assets/images/bird3.png")
+]
 
 BASE_IMAGE = pygame.image.load("assets/images/base.png")
 BASE_HEIGHT = HEIGHT-BASE_IMAGE.get_height()
@@ -14,15 +18,18 @@ PIPE_IMAGE = pygame.image.load("assets/images/pipe.png")
 STARTING_MESSAGE = pygame.image.load("assets/images/message.png")
 
 class Bird:
-    def __init__(self, x, y, bird_image, base_height):
+    def __init__(self, x, y, bird_images, base_height):
         self.x = x
         self.y = y
-        self.bird_image = bird_image
+        self.bird_images = bird_images
         self.base_height = base_height
         self.gravity = 0.5 # Force de la gravité
         self.y_velocity = 0
         self.jump_force = 10 # Force du saut de l'oiseau
         self.y_velocity_max = -10 # Limite de vitesse max
+        self.animation_speed = 10
+        self.current_frame = 0
+        self.frame_counter = 0
 
     def update(self):
         self.y_velocity -= self.gravity
@@ -30,19 +37,24 @@ class Bird:
 
         if self.y_velocity <= self.y_velocity_max:
             self.y_velocity = self.y_velocity_max
-
+        
+        self.frame_counter += 1
+        if self.frame_counter >= self.animation_speed:
+            self.frame_counter = 0
+            self.current_frame = (self.current_frame + 1) % len(self.bird_images)
+            
         if self.is_touching_ceiling() or self.is_colliding_with_base():
             return True
         return False
 
     def draw(self, screen):
-        screen.blit(self.bird_image, (self.x, self.y))
+        screen.blit(self.bird_images[self.current_frame], (self.x, self.y))
         
     def jump(self):
         self.y_velocity = self.jump_force
 
     def is_colliding_with_base(self):
-        return self.y + self.bird_image.get_height() > self.base_height
+        return self.y + self.bird_images[self.current_frame].get_height() > self.base_height
 
     def is_touching_ceiling(self):
         return self.y < 0 
@@ -52,7 +64,7 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Flappy Bird de chez Wish")
-        self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGE, BASE_HEIGHT)
+        self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGES, BASE_HEIGHT)
         self.is_game_over = False
         self.game_started = False
         self.counter = 0
@@ -82,7 +94,7 @@ class Game:
                         self.game_started = True if not self.game_started else self.game_started # Commence le jeu s'il n'est pas commencé, sinon rien ne se passe.
 
                         if self.is_game_over:
-                            self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGE, BASE_HEIGHT) # Créer un nouvel oiseau si le dernier est mort
+                            self.bird = Bird(50, BASE_HEIGHT//2, BIRD_IMAGES, BASE_HEIGHT) # Créer un nouvel oiseau si le dernier est mort
                             self.is_game_over = False
 
                         self.bird.jump()
